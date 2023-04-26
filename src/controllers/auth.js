@@ -2,7 +2,11 @@ import _ from "lodash";
 
 import UserModel from "../models/user.js";
 import { ErrorMessage, catchErrorAsync, sendEmail } from "../utils/helper.js";
-import { signToken, verifyToken } from "../utils/common.js";
+import {
+  createTokenbyCrypto,
+  signToken,
+  verifyToken,
+} from "../utils/common.js";
 import { ERROR_CODE } from "../constant/error-code.js";
 
 function handleResponse(res, doc) {
@@ -74,6 +78,70 @@ export const forgotPassword = catchErrorAsync(async (req, res, next) => {
   });
 });
 
+export const resetPassword = catchErrorAsync(async (req, res, next) => {
+  const { token } = req.params;
+  const { password, confirmPassword } = req.body;
+
+  if (_.isEmpty(token))
+    return next(
+      new ErrorMessage(
+        "No authen, Please access by link send to your email!",
+        ERROR_CODE.unauthorized
+      )
+    );
+
+  const resetToken = createTokenbyCrypto(token);
+
+  const doc = await UserModel.findOne({
+    "resetPassword.token": resetToken,
+    "resetPassword.expires": { $gt: Date.now() },
+  });
+
+  if (_.isEmpty(doc)) {
+    return next(
+      new ErrorMessage(
+        "token expires or token invalid!",
+        ERROR_CODE.unauthorized
+      )
+    );
+  }
+
+  doc.password = password;
+  doc.confirmPassword = confirmPassword;
+  doc.resetPassword = undefined;
+  doc.save({ validateModifiedOnly: true });
+
+  handleResponse(res, doc.toObject);
+});
+
+export const changePassword = catchErrorAsync(async (req, res, next) => {
+  const { currentPassword, password, confirmPassword } = req.body;
+  const { id } = req.params;
+
+  if (
+    _isEmpty(currentPassword) ||
+    _isEmpty(password) ||
+    _isEmpty(confirmPassword)
+  )
+    return new ErrorMessage("Missing data", ERROR_CODE.badRequest);
+
+  const doc = await UserModel.findById(id);
+  if (_.isEmpty(doc)) {
+    return next(new ErrorMessage("User not exist or deactivate"));
+  }
+
+  if (!(await doc.isValidPassword(password))) {
+    return next(new ErrorMessage("Wrong password!", ERROR_CODE.unauthorized));
+  }
+
+  doc.password = password;
+  doc.confirmPassword = confirmPassword;
+  doc.resetPassword = undefined;
+  doc.save({ validateModifiedOnly: true });
+
+  handleResponse(res, doc.toObject);
+});
+
 export const protect = catchErrorAsync(async (req, res, next) => {
   const isExcludeEndpoint = ["login", "forgot-password", "reset-password"].some(
     (x) => req.originalUrl.includes(x)
@@ -117,3 +185,21 @@ export const protect = catchErrorAsync(async (req, res, next) => {
   req.userInfo = doc.toObject();
   next();
 });
+
+export const restricRole = (...roles) => {
+  return (req, res, next) => {
+    const {
+      jobInfo: { role },
+    } = req.userInfo;
+    const isPermission = roles.some((r) => role === r);
+
+    if (isPermission) {
+      return next();
+    }
+
+    res.status(ERROR_CODE.unauthorized).json({
+      status: "fail",
+      message: "Role not allow access to the resource",
+    });
+  };
+};
