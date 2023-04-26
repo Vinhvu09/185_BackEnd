@@ -91,6 +91,7 @@ export async function getAll(req, res, next) {
     });
   }
 }
+
 export async function detail(req, res, next) {
   try {
     const { id } = req.params;

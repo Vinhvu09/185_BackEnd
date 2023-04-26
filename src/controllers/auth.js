@@ -45,6 +45,24 @@ export const login = catchErrorAsync(async (req, res, next) => {
   handleResponse(res, doc.toObject());
 });
 
+export const profile = catchErrorAsync(async (req, res, next) => {
+  const { _id } = req.userInfo;
+
+  const docs = await UserModel.findById(_id);
+  res.status(200).json({
+    status: "success",
+    data: docs,
+  });
+});
+
+export const logout = catchErrorAsync(async (req, res, next) => {
+  setCookie(res, "");
+  res.status(200).json({
+    status: "success",
+    data: null,
+  });
+});
+
 export const forgotPassword = catchErrorAsync(async (req, res, next) => {
   const { email } = req.body;
 
@@ -60,7 +78,7 @@ export const forgotPassword = catchErrorAsync(async (req, res, next) => {
   const resetToken = doc.createResetToken();
   await doc.save({ validateModifiedOnly: true });
 
-  const endpointResetPassword = `${req.protocol}/api/v1/auth/reset-password/${resetToken}`;
+  const endpointResetPassword = `${req.headers.origin}/reset-password/${resetToken}`;
   const text = `Link to reset password: ${endpointResetPassword}.\nIf you did'n forget, please ignore this mail.`;
 
   await sendEmail({
