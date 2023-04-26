@@ -2,7 +2,11 @@ import { promisify } from "util";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 
-import { JWT_EXPIRES_IN } from "../constant/common.js";
+import {
+  COOKIE_EXPIRES,
+  ENVIROMENT,
+  JWT_EXPIRES_IN,
+} from "../constant/common.js";
 
 export const signToken = (data) => {
   return jwt.sign(data, process.env.JWT_SECRET, {
@@ -16,4 +20,12 @@ export const verifyToken = (token) => {
 
 export function createTokenbyCrypto(data) {
   return crypto.createHash("sha256").update(data).digest("hex");
+}
+
+export function setCookie(res, data) {
+  res.cookie("token", data, {
+    expires: new Date(COOKIE_EXPIRES),
+    secure: process.env.NODE_ENV === ENVIROMENT.prod,
+    httpOnly: true,
+  });
 }

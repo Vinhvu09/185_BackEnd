@@ -4,23 +4,20 @@ import UserModel from "../models/user.js";
 import { ErrorMessage, catchErrorAsync, sendEmail } from "../utils/helper.js";
 import {
   createTokenbyCrypto,
+  setCookie,
   signToken,
   verifyToken,
 } from "../utils/common.js";
 import { ERROR_CODE } from "../constant/error-code.js";
+import { ENVIROMENT } from "../constant/common.js";
 
 function handleResponse(res, doc) {
   const token = signToken({ id: doc._id, user_code: doc.code });
+  setCookie(res, token);
 
   res.status(ERROR_CODE.OK).json({
     status: "success",
     token,
-  });
-}
-
-function setCookie(res, data) {
-  res.cookie("token", data, {
-    expires,
   });
 }
 
@@ -91,7 +88,6 @@ export const resetPassword = catchErrorAsync(async (req, res, next) => {
     );
 
   const resetToken = createTokenbyCrypto(token);
-
   const doc = await UserModel.findOne({
     "resetPassword.token": resetToken,
     "resetPassword.expires": { $gt: Date.now() },
@@ -119,18 +115,20 @@ export const changePassword = catchErrorAsync(async (req, res, next) => {
   const { id } = req.params;
 
   if (
-    _isEmpty(currentPassword) ||
-    _isEmpty(password) ||
-    _isEmpty(confirmPassword)
+    _.isEmpty(currentPassword) ||
+    _.isEmpty(password) ||
+    _.isEmpty(confirmPassword)
   )
-    return new ErrorMessage("Missing data", ERROR_CODE.badRequest);
+    return next(new ErrorMessage("Missing data", ERROR_CODE.badRequest));
 
-  const doc = await UserModel.findById(id);
+  const doc = await UserModel.findById(id).select("+password");
   if (_.isEmpty(doc)) {
-    return next(new ErrorMessage("User not exist or deactivate"));
+    return next(
+      new ErrorMessage("User not exist or deactivate", ERROR_CODE.notFound)
+    );
   }
 
-  if (!(await doc.isValidPassword(password))) {
+  if (!(await doc.isValidPassword(currentPassword))) {
     return next(new ErrorMessage("Wrong password!", ERROR_CODE.unauthorized));
   }
 

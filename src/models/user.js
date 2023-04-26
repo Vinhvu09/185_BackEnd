@@ -164,12 +164,10 @@ userSchema.methods.isValidPassword = function (password) {
 };
 
 userSchema.methods.createResetToken = function () {
-  const resetToken = createTokenbyCrypto(
-    crypto.randomBytes(32).toString("hex")
-  );
+  const resetToken = crypto.randomBytes(32).toString("hex");
 
   const TIME_EXPIRES = 10 * 60 * 1000;
-  this.resetPassword.token = resetToken;
+  this.resetPassword.token = createTokenbyCrypto(resetToken);
   this.resetPassword.expires = Date.now() + TIME_EXPIRES;
 
   return resetToken;
