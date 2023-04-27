@@ -8,12 +8,15 @@ import {
   signToken,
   verifyToken,
 } from "../utils/common.js";
-import { ERROR_CODE } from "../constant/error-code.js";
-import { ENVIROMENT } from "../constant/common.js";
+import { COOKIE_EXPIRES, ENVIROMENT, ERROR_CODE } from "../constant/common.js";
 
 function handleResponse(res, doc) {
   const token = signToken({ id: doc._id, user_code: doc.code });
-  setCookie(res, token);
+  setCookie(res, token, {
+    expires: new Date(COOKIE_EXPIRES),
+    secure: process.env.NODE_ENV === ENVIROMENT.prod,
+    httpOnly: true,
+  });
 
   res.status(ERROR_CODE.OK).json({
     status: "success",
@@ -35,7 +38,9 @@ export const login = catchErrorAsync(async (req, res, next) => {
 
   const doc = await UserModel.findOne({ code: user_code }).select("+password");
   if (_.isEmpty(doc)) {
-    return next(new ErrorMessage("User not exist or deactivate"));
+    return next(
+      new ErrorMessage("User not exist or deactivate", ERROR_CODE.unauthorized)
+    );
   }
 
   if (!(await doc.isValidPassword(password))) {
@@ -56,8 +61,12 @@ export const profile = catchErrorAsync(async (req, res, next) => {
 });
 
 export const logout = catchErrorAsync(async (req, res, next) => {
-  setCookie(res, "");
-  res.status(200).json({
+  setCookie(res, "", {
+    expires: new Date(),
+    secure: process.env.NODE_ENV === ENVIROMENT.prod,
+    httpOnly: true,
+  });
+  res.status(ERROR_CODE.noContent).json({
     status: "success",
     data: null,
   });
@@ -168,7 +177,9 @@ export const protect = catchErrorAsync(async (req, res, next) => {
 
   if (
     !req.headers.authorization ||
-    !req.headers.authorization.startsWith("Bearer")
+    !req.headers.authorization.startsWith("Bearer") ||
+    _.isEmpty(req.cookies) ||
+    !req.cookies.token
   ) {
     return next(new ErrorMessage("Please login!", ERROR_CODE.unauthorized));
   }

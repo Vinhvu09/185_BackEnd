@@ -1,5 +1,4 @@
-import { ENVIROMENT } from "../constant/common.js";
-import { ERROR_CODE } from "../constant/error-code.js";
+import { ENVIROMENT, ERROR_CODE } from "../constant/common.js";
 
 function handleErrorDev(error, res) {
   res.status(error.statusCode).json({

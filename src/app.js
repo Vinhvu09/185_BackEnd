@@ -11,8 +11,8 @@ import authRouter from "./routes/auth.js";
 import userRouter from "./routes/user.js";
 import { ErrorMessage } from "./utils/helper.js";
 import { globalErrorHandler } from "./middlewares/error.js";
-import { ERROR_CODE } from "./constant/error-code.js";
 import { protect } from "./controllers/auth.js";
+import { ERROR_CODE } from "./constant/common.js";
 
 const app = express();
 

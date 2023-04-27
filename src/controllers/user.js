@@ -1,3 +1,9 @@
+import {
+  deleteById,
+  findAll,
+  findById,
+  updateByIdOrCreate,
+} from "../middlewares/factory.js";
 import UserModel from "../models/user.js";
 
 function parseUserBody(data) {
@@ -60,87 +66,25 @@ function parseUserBody(data) {
   };
 }
 
-export async function create(req, res, next) {
-  try {
-    const payload = parseUserBody(req.body);
-    const doc = await UserModel.create(payload);
-    res.status(200).json({
-      status: "Success",
-      data: doc,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      status: "Fail",
-      message: "Internal server",
-    });
-  }
-}
-export async function getAll(req, res, next) {
-  try {
-    const docs = await UserModel.find();
-    res.status(200).json({
-      status: "Success",
-      data: docs,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      status: "Fail",
-      message: "Internal server",
-    });
-  }
-}
+export const create = (req, res, next) => {
+  req.body = parseUserBody(req.body);
+  updateByIdOrCreate(UserModel, false)(req, res, next);
+};
 
-export async function detail(req, res, next) {
-  try {
-    const { id } = req.params;
-    const docs = await UserModel.findById(id);
-    res.status(200).json({
-      status: "Success",
-      data: docs,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      status: "Fail",
-      message: "Internal server",
-    });
-  }
-}
-export async function remove(req, res, next) {
-  try {
-    const { id } = req.params;
-    const docs = await UserModel.findByIdAndDelete(id);
-    res.status(200).json({
-      status: "Success",
-      data: null,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      status: "Fail",
-      message: "Internal server",
-    });
-  }
-}
-export async function update(req, res, next) {
-  try {
-    const { id } = req.params;
-    const payload = parseUserBody(req.body);
-    const doc = await UserModel.findByIdAndUpdate(id, payload, {
-      runValidators: true,
-      returnDocument: "after",
-    });
-    res.status(200).json({
-      status: "Success",
-      data: doc,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      status: "Fail",
-      message: "Internal server",
-    });
-  }
-}
+export const getAll = function (req, res, next) {
+  const search = {};
+  findAll(UserModel, search)(req, res, next);
+};
+
+export const detail = findById(UserModel);
+
+export const remove = deleteById(UserModel);
+
+export const update = (req, res, next) => {
+  req.body = parseUserBody(req.body);
+  updateByIdOrCreate(UserModel, true, ["password", "confirmPassword"])(
+    req,
+    res,
+    next
+  );
+};

@@ -22,10 +22,6 @@ export function createTokenbyCrypto(data) {
   return crypto.createHash("sha256").update(data).digest("hex");
 }
 
-export function setCookie(res, data) {
-  res.cookie("token", data, {
-    expires: new Date(COOKIE_EXPIRES),
-    secure: process.env.NODE_ENV === ENVIROMENT.prod,
-    httpOnly: true,
-  });
+export function setCookie(res, token, options) {
+  res.cookie("token", token, options);
 }

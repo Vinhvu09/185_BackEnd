@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import validator from "validator";
 import crypto from "crypto";
 
-import { phoneNumberRegex } from "../constant/regex.js";
+import { findQueryRegex, phoneNumberRegex } from "../constant/regex.js";
 import { convertUnixTime } from "../utils/date.js";
 import { createTokenbyCrypto } from "../utils/common.js";
 
@@ -151,6 +151,14 @@ userSchema.pre("save", async function (next) {
 
   const TIME_DELAY = 1000;
   this.timeUpdatePassword = Date.now() - TIME_DELAY;
+  next();
+});
+
+userSchema.pre(findQueryRegex, function (next) {
+  this.find({ isActivate: true }).select(
+    "-__v -timeUpdatePassword -createAt -isActivate"
+  );
+  next();
 });
 
 userSchema.methods.isChangePassword = function (time) {
