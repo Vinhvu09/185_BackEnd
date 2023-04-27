@@ -1,7 +1,7 @@
 import _ from "lodash";
 
 import UserModel from "../models/user.js";
-import { ErrorMessage, catchErrorAsync, sendEmail } from "../utils/helper.js";
+import { ErrorMessage, catchErrorAsync, sendEmail } from "../utils/common.js";
 import {
   createTokenbyCrypto,
   setCookie,
@@ -11,7 +11,12 @@ import {
 import { COOKIE_EXPIRES, ENVIROMENT, ERROR_CODE } from "../constant/common.js";
 
 function handleResponse(res, doc) {
-  const token = signToken({ id: doc._id, user_code: doc.code });
+  const data = { id: doc.id, user_code: doc.code, role: doc.jobInfo.role };
+  const token = signToken(data);
+  const refreshToken = signToken(data, {
+    expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES_IN,
+  });
+
   setCookie(res, token, {
     expires: new Date(COOKIE_EXPIRES),
     secure: process.env.NODE_ENV === ENVIROMENT.prod,
@@ -21,6 +26,7 @@ function handleResponse(res, doc) {
   res.status(ERROR_CODE.OK).json({
     status: "success",
     token,
+    refreshToken,
   });
 }
 
@@ -47,7 +53,7 @@ export const login = catchErrorAsync(async (req, res, next) => {
     return next(new ErrorMessage("Wrong password!", ERROR_CODE.unauthorized));
   }
 
-  handleResponse(res, doc.toObject());
+  handleResponse(res, doc);
 });
 
 export const profile = catchErrorAsync(async (req, res, next) => {
@@ -63,8 +69,6 @@ export const profile = catchErrorAsync(async (req, res, next) => {
 export const logout = catchErrorAsync(async (req, res, next) => {
   setCookie(res, "", {
     expires: new Date(),
-    secure: process.env.NODE_ENV === ENVIROMENT.prod,
-    httpOnly: true,
   });
   res.status(ERROR_CODE.noContent).json({
     status: "success",
@@ -134,7 +138,7 @@ export const resetPassword = catchErrorAsync(async (req, res, next) => {
   doc.resetPassword = undefined;
   doc.save({ validateModifiedOnly: true });
 
-  handleResponse(res, doc.toObject);
+  handleResponse(res, doc);
 });
 
 export const changePassword = catchErrorAsync(async (req, res, next) => {
@@ -164,7 +168,7 @@ export const changePassword = catchErrorAsync(async (req, res, next) => {
   doc.resetPassword = undefined;
   doc.save({ validateModifiedOnly: true });
 
-  handleResponse(res, doc.toObject);
+  handleResponse(res, doc);
 });
 
 export const protect = catchErrorAsync(async (req, res, next) => {

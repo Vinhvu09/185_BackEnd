@@ -9,7 +9,7 @@ import mongoSanitize from "express-mongo-sanitize";
 
 import authRouter from "./routes/auth.js";
 import userRouter from "./routes/user.js";
-import { ErrorMessage } from "./utils/helper.js";
+import { ErrorMessage } from "./utils/common.js";
 import { globalErrorHandler } from "./middlewares/error.js";
 import { protect } from "./controllers/auth.js";
 import { ERROR_CODE } from "./constant/common.js";

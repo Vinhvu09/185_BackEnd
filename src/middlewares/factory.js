@@ -1,7 +1,7 @@
 import _ from "lodash";
 
 import { ERROR_CODE, LIMIT, PAGE } from "../constant/common.js";
-import { catchErrorAsync } from "../utils/helper.js";
+import { catchErrorAsync } from "../utils/common.js";
 
 function sanitizeBody(data, includeBody = []) {
   if (_.isEmpty(includeBody)) return data;
