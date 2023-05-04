@@ -1,0 +1,377 @@
+{
+	"info": {
+		"_postman_id": "0047f10e-783a-420f-8946-88107087e1c3",
+		"name": "My-Project",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Staff",
+			"item": [
+				{
+					"name": "getAll",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}staff",
+							"host": [
+								"{{url}}staff"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"signature\": \"signature\",\r\n    \"stamp\": \"BT\",\r\n    \"work_days\": 34,\r\n    \"basic_salary\": 20000000,\r\n    \"bank_department\": \"Quan 3\",\r\n    \"confirmPassword\": \"Ps@123456\",\r\n    \"password\": \"Ps@123456\",\r\n    \"bank\": \"Vietcombank\",\r\n    \"card_number\": 3123456789,\r\n    \"card_name\": \"NGUYENMINHCANH\",\r\n    \"department\": 1,\r\n    \"position\": 2,\r\n    \"role\": 1,\r\n    \"email\": \"canhnm3@gmail.com\",\r\n    \"last_name\": \"Cảnh\",\r\n    \"first_name\": \"Nguyễn\",\r\n    \"avatar\": \"\",\r\n    \"phone_number\": \"0934449555\",\r\n    \"country\": 1,\r\n    \"province\": 2,\r\n    \"district\": 26,\r\n    \"ward\": 718,\r\n    \"address\": \"Quan 4, HCM\",\r\n    \"code\": \"CANHNM3\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}staff",
+							"host": [
+								"{{url}}staff"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"signature\": \"signature\",\r\n    \"stamp\": \"BT\",\r\n    \"work_days\": 34,\r\n    \"basic_salary\": 20000000,\r\n    \"bank_department\": \"Quan 3\",\r\n    \"confirmPassword\": \"Ps@123456\",\r\n    \"password\": \"Ps@123456\",\r\n    \"bank\": \"Vietcombank\",\r\n    \"card_number\": 3123456789,\r\n    \"card_name\": \"NGUYENMINHCANH\",\r\n    \"department\": 1,\r\n    \"position\": 2,\r\n    \"role\": 1,\r\n    \"email\": \"canhnm2@gmail.com\",\r\n    \"last_name\": \"Cảnh\",\r\n    \"first_name\": \"Nguyễn\",\r\n    \"avatar\": \"\",\r\n    \"phone_number\": \"0934449555\",\r\n    \"country\": 1,\r\n    \"province\": 2,\r\n    \"district\": 26,\r\n    \"ward\": 718,\r\n    \"address\": \"Quan 4, HCM\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}staff/644794878fb4a6c1eecc9996",
+							"host": [
+								"{{url}}staff"
+							],
+							"path": [
+								"644794878fb4a6c1eecc9996"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}staff/644a135b404924609ac2cf3c",
+							"host": [
+								"{{url}}staff"
+							],
+							"path": [
+								"644a135b404924609ac2cf3c"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.globals.set(\"token\", pm.response.json()?.token || pm.variables.get(\"token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_code\": \"AKWESCZXS\",\r\n    \"password\": \"Ps@1234567\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}auth/login",
+							"host": [
+								"{{url}}auth"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "refresh token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.globals.set(\"token\", pm.response.json()?.token || pm.variables.get(\"token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}auth/refresh-token",
+							"host": [
+								"{{url}}auth"
+							],
+							"path": [
+								"refresh-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}auth/logout",
+							"host": [
+								"{{url}}auth"
+							],
+							"path": [
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.globals.set(\"token\", pm.response.json()?.token || pm.variables.get(\"token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"currentPassword\" :\"Ps@123456\",\r\n    \"password\": \"Ps@1234567\",\r\n    \"confirmPassword\" : \"Ps@1234567\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}auth/change-password/6448c5fa83cadd3e88f41ba3",
+							"host": [
+								"{{url}}auth"
+							],
+							"path": [
+								"change-password",
+								"6448c5fa83cadd3e88f41ba3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.globals.set(\"token\", pm.response.json()?.token || pm.variables.get(\"token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"confirmPassword\" : \"Ps@1234567\",\r\n    \"password\": \"Ps@1234567\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}auth/reset-password/d1e26eefb46ca6bb8d3c96a9c983fda3f15d18009dc943b7f5129967cfc210c2",
+							"host": [
+								"{{url}}auth"
+							],
+							"path": [
+								"reset-password",
+								"d1e26eefb46ca6bb8d3c96a9c983fda3f15d18009dc943b7f5129967cfc210c2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "forgot password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.globals.set(\"token\", pm.response.json()?.token || pm.variables.get(\"token\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"canhnm1@gmail.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}auth/forgot-password",
+							"host": [
+								"{{url}}auth"
+							],
+							"path": [
+								"forgot-password"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

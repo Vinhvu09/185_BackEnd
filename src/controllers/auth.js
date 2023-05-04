@@ -1,34 +1,96 @@
 import _ from "lodash";
 
+import { ERROR_CODE, EXPIRES_TIME } from "../constant/common.js";
+import RefreshTokenModel from "../models/refresh-token.js";
 import UserModel from "../models/user.js";
-import { ErrorMessage, catchErrorAsync, sendEmail } from "../utils/common.js";
 import {
+  catchErrorAsync,
   createTokenbyCrypto,
+  ErrorMessage,
+  sendEmail,
   setCookie,
   signToken,
   verifyToken,
 } from "../utils/common.js";
-import { COOKIE_EXPIRES, ENVIROMENT, ERROR_CODE } from "../constant/common.js";
 
-function handleResponse(res, doc) {
-  const data = { id: doc.id, user_code: doc.code, role: doc.jobInfo.role };
-  const token = signToken(data);
+function generateToken(data) {
+  const { ipAddress, ...rest } = data;
+  const accessToken = signToken(rest);
   const refreshToken = signToken(data, {
     expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES_IN,
   });
 
-  setCookie(res, token, {
-    expires: new Date(COOKIE_EXPIRES),
-    secure: process.env.NODE_ENV === ENVIROMENT.prod,
-    httpOnly: true,
+  return {
+    token: accessToken,
+    refreshToken,
+  };
+}
+
+async function handleAuthenResponse(req, res, doc) {
+  const expires = Date.now() + EXPIRES_TIME["7d"];
+  const data = {
+    id: doc.id,
+    user_code: doc.code,
+    role: doc.jobInfo.role,
+    email: doc.email,
+    ipAddress: req.ip,
+  };
+  const { token, refreshToken } = generateToken(data);
+
+  await RefreshTokenModel.create({
+    user: data.id,
+    token: refreshToken,
+    expires,
+    createdByIp: data.ipAddress,
+  });
+
+  setCookie(res, "refreshToken", refreshToken, {
+    expires: new Date(expires),
   });
 
   res.status(ERROR_CODE.OK).json({
     status: "success",
     token,
-    refreshToken,
   });
 }
+
+export const refreshToken = catchErrorAsync(async (req, res, next) => {
+  const token = req.cookies.refreshToken;
+  if (!token) {
+    return next(
+      new ErrorMessage("Please login again!", ERROR_CODE.unauthorized)
+    );
+  }
+
+  const decode = await verifyToken(token);
+  const doc = await RefreshTokenModel.findOne({ token });
+  if (doc.isExpired) {
+    return next(
+      new ErrorMessage(
+        "Refresh token was expired, please login again!",
+        ERROR_CODE.unauthorized
+      )
+    );
+  }
+
+  const user = await UserModel.findById(decode.id);
+  if (_.isEmpty(user)) {
+    return next(
+      new ErrorMessage("User not exist or deactivate", ERROR_CODE.unauthorized)
+    );
+  }
+  if (user.isChangePassword(decode.iat)) {
+    return next(
+      new ErrorMessage(
+        "Password was changed, please login again!",
+        ERROR_CODE.unauthorized
+      )
+    );
+  }
+
+  await handleAuthenResponse(req, res, user);
+  await RefreshTokenModel.deleteOne({ _id: doc.id });
+});
 
 export const login = catchErrorAsync(async (req, res, next) => {
   const { user_code, password } = req.body;
@@ -53,13 +115,13 @@ export const login = catchErrorAsync(async (req, res, next) => {
     return next(new ErrorMessage("Wrong password!", ERROR_CODE.unauthorized));
   }
 
-  handleResponse(res, doc);
+  await handleAuthenResponse(req, res, doc);
 });
 
 export const profile = catchErrorAsync(async (req, res, next) => {
-  const { _id } = req.userInfo;
+  const { id } = req.userInfo;
 
-  const docs = await UserModel.findById(_id);
+  const docs = await UserModel.findById(id);
   res.status(200).json({
     status: "success",
     data: docs,
@@ -67,7 +129,10 @@ export const profile = catchErrorAsync(async (req, res, next) => {
 });
 
 export const logout = catchErrorAsync(async (req, res, next) => {
-  setCookie(res, "", {
+  const { id } = req.userInfo;
+  await RefreshTokenModel.deleteMany({ user: id });
+
+  setCookie(res, "refreshToken", "", {
     expires: new Date(),
   });
   res.status(ERROR_CODE.noContent).json({
@@ -138,7 +203,7 @@ export const resetPassword = catchErrorAsync(async (req, res, next) => {
   doc.resetPassword = undefined;
   doc.save({ validateModifiedOnly: true });
 
-  handleResponse(res, doc);
+  await handleAuthenResponse(req, res, doc);
 });
 
 export const changePassword = catchErrorAsync(async (req, res, next) => {
@@ -168,13 +233,16 @@ export const changePassword = catchErrorAsync(async (req, res, next) => {
   doc.resetPassword = undefined;
   doc.save({ validateModifiedOnly: true });
 
-  handleResponse(res, doc);
+  await handleAuthenResponse(req, res, doc);
 });
 
 export const protect = catchErrorAsync(async (req, res, next) => {
-  const isExcludeEndpoint = ["login", "forgot-password", "reset-password"].some(
-    (x) => req.originalUrl.includes(x)
-  );
+  const isExcludeEndpoint = [
+    "login",
+    "forgot-password",
+    "reset-password",
+    "refresh-token",
+  ].some((x) => req.originalUrl.includes(x));
   if (isExcludeEndpoint) {
     return next();
   }
@@ -183,7 +251,7 @@ export const protect = catchErrorAsync(async (req, res, next) => {
     !req.headers.authorization ||
     !req.headers.authorization.startsWith("Bearer") ||
     _.isEmpty(req.cookies) ||
-    !req.cookies.token
+    !req.cookies.refreshToken
   ) {
     return next(new ErrorMessage("Please login!", ERROR_CODE.unauthorized));
   }
@@ -223,7 +291,6 @@ export const restricRole = (...roles) => {
       jobInfo: { role },
     } = req.userInfo;
     const isPermission = roles.some((r) => role === r);
-
     if (isPermission) {
       return next();
     }

@@ -3,7 +3,7 @@ import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 
-import { COOKIE_EXPIRES, ENVIROMENT } from "../constant/common.js";
+import { EXPIRES_TIME, ENVIROMENT } from "../constant/common.js";
 
 export const signToken = (data, options = {}) => {
   return jwt.sign(data, process.env.JWT_SECRET, {
@@ -20,11 +20,12 @@ export function createTokenbyCrypto(data) {
   return crypto.createHash("sha256").update(data).digest("hex");
 }
 
-export function setCookie(res, token, options) {
-  res.cookie("token", token, {
-    expires: new Date(COOKIE_EXPIRES),
+export function setCookie(res, name = "jwt", data, options) {
+  res.cookie(name, data, {
+    expires: new Date(Date.now() + EXPIRES_TIME["1h"]),
     secure: process.env.NODE_ENV === ENVIROMENT.prod,
     httpOnly: true,
+    sameSite: "strict",
     ...options,
   });
 }

@@ -1,15 +1,25 @@
 import { ENVIROMENT, ERROR_CODE } from "../constant/common.js";
 
 function handleErrorDev(error, res) {
+  let message = "";
+  switch (error.name) {
+    case "TokenExpiredError":
+      message = "Token expired, please login again!";
+      break;
+
+    default:
+      message = error.message;
+      break;
+  }
+
   res.status(error.statusCode).json({
     status: "error",
-    message: error.message,
+    message,
     stack: error.stack,
   });
 }
 
 function handleErrorProd(error, res) {
-  console.error(error);
   res.status(error.statusCode).json({
     status: "error",
     message: error.isOperational ? error.message : "Something went wrong!",

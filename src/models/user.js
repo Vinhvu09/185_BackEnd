@@ -78,7 +78,7 @@ const userSchema = new mongoose.Schema(
       },
       positions: {
         type: Number,
-        equired: [true, "Postition required"],
+        required: [true, "Postition required"],
         enum: {
           values: [1, 2],
           message: "{VALUE} is not supported",
@@ -86,7 +86,7 @@ const userSchema = new mongoose.Schema(
       },
       role: {
         type: Number,
-        equired: [true, "Role required"],
+        required: [true, "Role required"],
         enum: {
           values: [1, 2],
           message: "{VALUE} is not supported",
@@ -135,7 +135,6 @@ const userSchema = new mongoose.Schema(
       token: String,
       expires: Date,
     },
-
     timeUpdatePassword: Date,
     createAt: {
       type: Date,
@@ -143,7 +142,10 @@ const userSchema = new mongoose.Schema(
     },
   },
   {
-    toJSON: true,
+    toJSON: {
+      getters: true,
+      virtuals: true,
+    },
   }
 );
 
@@ -160,9 +162,7 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.pre(findQueryRegex, function (next) {
-  this.find({ isActivate: true }).select(
-    "-__v -timeUpdatePassword -createAt -isActivate"
-  );
+  this.find({ isActivate: true }).select("-__v -createAt -isActivate");
   next();
 });
 
