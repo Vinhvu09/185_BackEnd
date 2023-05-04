@@ -76,7 +76,7 @@ const userSchema = new mongoose.Schema(
           message: "{VALUE} is not supported",
         },
       },
-      positions: {
+      position: {
         type: Number,
         required: [true, "Postition required"],
         enum: {

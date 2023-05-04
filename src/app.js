@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
@@ -28,7 +27,7 @@ const limiter = rateLimit({
 
 app.use(limiter);
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
-app.use(bodyParser.json({ limit: "10kb" }));
+app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 

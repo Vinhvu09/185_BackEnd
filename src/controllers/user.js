@@ -67,6 +67,8 @@ function parseUserBody(data) {
 }
 
 export const create = (req, res, next) => {
+  console.log(req.body);
+  console.log(req.file);
   req.body = parseUserBody(req.body);
   updateByIdOrCreate(UserModel, false)(req, res, next);
 };

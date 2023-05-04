@@ -4,6 +4,7 @@ function handleErrorDev(error, res) {
   let message = "";
   switch (error.name) {
     case "TokenExpiredError":
+      error.statusCode = ERROR_CODE.unauthorized;
       message = "Token expired, please login again!";
       break;
 
