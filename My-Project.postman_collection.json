@@ -33,6 +33,33 @@
 					"response": []
 				},
 				{
+					"name": "detail",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}staff/64535bc0cb266ea52566d597",
+							"host": [
+								"{{url}}staff"
+							],
+							"path": [
+								"64535bc0cb266ea52566d597"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "create",
 					"request": {
 						"auth": {
@@ -102,6 +129,108 @@
 					"response": []
 				},
 				{
+					"name": "me",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "avatar",
+									"type": "file",
+									"src": "/Users/daiquocviet4/Downloads/map.png"
+								},
+								{
+									"key": "signature",
+									"type": "file",
+									"src": "/Users/daiquocviet4/Downloads/about-5.png"
+								},
+								{
+									"key": "stamp",
+									"type": "file",
+									"src": "/Users/daiquocviet4/Downloads/about-banner.jpg"
+								},
+								{
+									"key": "name",
+									"value": "Cảnh",
+									"type": "default"
+								},
+								{
+									"key": "info",
+									"value": "{\n    \"signature\": \"signature\",\n    \"stamp\": \"BT\",\n    \"work_days\": 34,\n    \"basic_salary\": 20000000,\n    \"bank_department\": \"Quan 3\",\n    \"confirmPassword\": \"Ps@123456\",\n    \"password\": \"Ps@123456\",\n    \"bank\": \"Vietcombank\",\n    \"card_number\": 3123456789,\n    \"card_name\": \"NGUYENMINHCANH\",\n    \"department\": 1,\n    \"position\": 2,\n    \"role\": 1,\n    \"email\": \"canhnm2@gmail.com\",\n    \"last_name\": \"Cảnh\",\n    \"first_name\": \"Nguyễn\",\n    \"avatar\": \"\",\n    \"phone_number\": \"0934449555\",\n    \"country\": 1,\n    \"province\": 2,\n    \"district\": 26,\n    \"ward\": 718,\n    \"address\": \"Quan 4, HCM\"\n}",
+									"type": "text",
+									"disabled": true
+								}
+							],
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}staff/me",
+							"host": [
+								"{{url}}staff"
+							],
+							"path": [
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "image",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}staff/me",
+							"host": [
+								"{{url}}staff"
+							],
+							"path": [
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "delete",
 					"request": {
 						"auth": {
@@ -151,7 +280,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"user_code\": \"AKWESCZXS\",\r\n    \"password\": \"Ps@1234567\"\r\n}",
+							"raw": "{\r\n    \"user_code\": \"CANHNM4\",\r\n    \"password\": \"Ps@123456\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -366,6 +495,53 @@
 							],
 							"path": [
 								"forgot-password"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Artefact",
+			"item": [
+				{
+					"name": "upload",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": [
+										"/Users/daiquocviet4/Documents/ngoMonHue/Build/ngoMonHue.data.gz",
+										"/Users/daiquocviet4/Documents/ngoMonHue/Build/ngoMonHue.framework.js.gz",
+										"/Users/daiquocviet4/Documents/ngoMonHue/Build/ngoMonHue.loader.js",
+										"/Users/daiquocviet4/Documents/ngoMonHue/Build/ngoMonHue.wasm.gz"
+									]
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}artefact/",
+							"host": [
+								"{{url}}artefact"
+							],
+							"path": [
+								""
 							]
 						}
 					},
