@@ -1,3 +1,9 @@
+import multer from "multer";
+import sharp from "sharp";
+import path from "path";
+import _ from "lodash";
+import fs from "fs";
+
 import {
   deleteById,
   findAll,
@@ -5,6 +11,8 @@ import {
   updateByIdOrCreate,
 } from "../middlewares/factory.js";
 import UserModel from "../models/user.js";
+import config from "../configs/index.js";
+import { catchErrorAsync } from "../utils/common.js";
 
 function parseUserBody(data) {
   const {
@@ -66,10 +74,70 @@ function parseUserBody(data) {
   };
 }
 
+function createFolder(path) {
+  if (fs.existsSync(path)) return;
+
+  fs.mkdirSync(path, {
+    recursive: true,
+  });
+}
+
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, "/public/images");
+//   },
+//   filename: function (req, file, cb) {
+//     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+//     cb(null, file.fieldname + "-" + uniqueSuffix);
+//   },
+// });
+
+const storage = multer.memoryStorage();
+
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image")) {
+    cb(null, true);
+  } else {
+    cb(
+      new ErrorMessage("File extention don't allow", ERROR_CODE.badRequest),
+      false
+    );
+  }
+};
+
+const upload = multer({ storage, fileFilter });
+
+export const uploadImage = upload.fields([
+  { name: "avatar", maxCount: 1 },
+  { name: "signature", maxCount: 1 },
+  { name: "stamp", maxCount: 1 },
+]);
+
+export const resizeImage = catchErrorAsync(async (req, res, next) => {
+  const { id } = req.userInfo;
+  const rootPath = path.join(config.imagePath, id);
+  if (_.isEmpty(req.files)) return next();
+
+  createFolder(rootPath);
+  for (const key in req.files) {
+    const file = _.first(req.files[key]);
+    const fileName = `${id}-${key}.jpeg`;
+    file.fileName = path.join(id, fileName);
+    await sharp(file.buffer)
+      .resize(300)
+      .jpeg({ quality: 50 })
+      .toFile(path.join(rootPath, fileName));
+  }
+  next();
+});
+
 export const create = (req, res, next) => {
-  console.log(req.body);
-  console.log(req.file);
+  _.values(req.files).forEach((file) => {
+    const image = _.first(file);
+    req.body[image.fieldname] = image.fileName;
+  });
   req.body = parseUserBody(req.body);
+
   updateByIdOrCreate(UserModel, false)(req, res, next);
 };
 
@@ -83,6 +151,10 @@ export const detail = findById(UserModel);
 export const remove = deleteById(UserModel);
 
 export const update = (req, res, next) => {
+  _.values(req.files).forEach((file) => {
+    const image = _.first(file);
+    req.body[image.fieldname] = image.fileName;
+  });
   req.body = parseUserBody(req.body);
   updateByIdOrCreate(UserModel, true, ["password", "confirmPassword"])(
     req,

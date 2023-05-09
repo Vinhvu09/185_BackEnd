@@ -8,12 +8,31 @@ import mongoSanitize from "express-mongo-sanitize";
 
 import authRouter from "./routes/auth.js";
 import userRouter from "./routes/user.js";
+import artefactRouter from "./routes/artefact.js";
 import { ErrorMessage } from "./utils/common.js";
 import { globalErrorHandler } from "./middlewares/error.js";
 import { protect } from "./controllers/auth.js";
 import { ERROR_CODE } from "./constant/common.js";
+import config from "./configs/index.js";
 
 const app = express();
+
+app.use(
+  cors({
+    credentials: true,
+    origin: "http://localhost:3000",
+  })
+);
+// app.use(cors());
+
+app.get("*.gz", function (req, res, next) {
+  res.set("Content-Encoding", "gzip");
+  res.set("Content-Type", "text/javascript");
+  next();
+});
+
+app.use(express.static(config.unityPath));
+app.use(express.static(config.imagePath));
 
 app.use(helmet());
 
@@ -26,7 +45,7 @@ const limiter = rateLimit({
 });
 
 app.use(limiter);
-app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -38,6 +57,7 @@ app.use(mongoSanitize());
 app.use(protect);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/staff", userRouter);
+app.use("/api/v1/artefact", artefactRouter);
 
 // Handle global error
 app.all("*", (req, res, next) => {

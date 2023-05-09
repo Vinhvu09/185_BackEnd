@@ -1,6 +1,4 @@
 import _ from "lodash";
-import multer from "multer";
-import sharp from "sharp";
 
 import { ERROR_CODE, EXPIRES_TIME } from "../constant/common.js";
 import RefreshTokenModel from "../models/refresh-token.js";
@@ -14,35 +12,6 @@ import {
   signToken,
   verifyToken,
 } from "../utils/common.js";
-
-const storage = multer.memoryStorage();
-
-const fileFilter = (req, file, cb) => {
-  console.log(file);
-  if (file.mimetype.startsWith("image")) {
-    cb(null, true);
-  } else {
-    cb(
-      new ErrorMessage("File extention don't allow", ERROR_CODE.badRequest),
-      false
-    );
-  }
-};
-
-const upload = multer({ storage, fileFilter });
-
-export const uploadImage = upload.single("avatar");
-// export const uploadImage = upload.fields([
-//   {
-//     name: "avatar",
-//   },
-//   {
-//     name: "signature",
-//   },
-//   {
-//     name: "stamp",
-//   },
-// ]);
 
 function generateToken(data) {
   const { ipAddress, ...rest } = data;
@@ -95,6 +64,15 @@ export const refreshToken = catchErrorAsync(async (req, res, next) => {
 
   const decode = await verifyToken(token);
   const doc = await RefreshTokenModel.findOne({ token });
+  if (_.isEmpty(doc)) {
+    return next(
+      new ErrorMessage(
+        "Token was deleted or invalid, please login again!",
+        ERROR_CODE.unauthorized
+      )
+    );
+  }
+
   if (doc.isExpired) {
     return next(
       new ErrorMessage(
@@ -157,7 +135,7 @@ export const profile = catchErrorAsync(async (req, res, next) => {
 });
 
 export const logout = catchErrorAsync(async (req, res, next) => {
-  const { _id: id } = req.userInfo;
+  const { id } = req.userInfo;
 
   await RefreshTokenModel.deleteMany({ user: id });
 

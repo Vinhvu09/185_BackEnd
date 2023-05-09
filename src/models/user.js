@@ -146,6 +146,9 @@ const userSchema = new mongoose.Schema(
       getters: true,
       virtuals: true,
     },
+    toObject: {
+      virtuals: true,
+    },
   }
 );
 
@@ -162,7 +165,7 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.pre(findQueryRegex, function (next) {
-  this.find({ isActivate: true }).select("-__v -createAt -isActivate");
+  this.find({ isActivate: true }).select("-__v -createAt");
   next();
 });
 

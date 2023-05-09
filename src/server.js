@@ -15,17 +15,17 @@ mongoose
   .connect(url)
   .then(() => {
     console.log("Connect DB success!");
+
+    const port = process.env.PORT || 4000;
+    const server = app.listen(port, () => {
+      console.log(`Example app listening on port ${port}`);
+    });
+
+    process.on("rejectionHandled", (error) => {
+      console.log(error);
+      server.close((err) => {
+        process.exit(1);
+      });
+    });
   })
   .catch((err) => console.log("Connect DB failed!"));
-
-const port = process.env.PORT || 4000;
-const server = app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
-
-process.on("rejectionHandled", (error) => {
-  console.log(error);
-  server.close((err) => {
-    process.exit(1);
-  });
-});
