@@ -1,8 +1,9 @@
 import express from "express";
-import { saveFile, uploadFile } from "../controllers/artefact.js";
+import { getFolderPath, saveFile, upload } from "../controllers/artefact.js";
 
 const router = express.Router();
 
-router.route("/").post(uploadFile, saveFile);
+router.post("/upload", upload, saveFile);
+router.get("/folder-path", getFolderPath);
 
 export default router;

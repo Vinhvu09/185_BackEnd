@@ -12,7 +12,7 @@ import {
 } from "../middlewares/factory.js";
 import UserModel from "../models/user.js";
 import config from "../configs/index.js";
-import { catchErrorAsync } from "../utils/common.js";
+import { catchErrorAsync, createFolder } from "../utils/common.js";
 
 function parseUserBody(data) {
   const {
@@ -74,26 +74,7 @@ function parseUserBody(data) {
   };
 }
 
-function createFolder(path) {
-  if (fs.existsSync(path)) return;
-
-  fs.mkdirSync(path, {
-    recursive: true,
-  });
-}
-
-// const storage = multer.diskStorage({
-//   destination: function (req, file, cb) {
-//     cb(null, "/public/images");
-//   },
-//   filename: function (req, file, cb) {
-//     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-//     cb(null, file.fieldname + "-" + uniqueSuffix);
-//   },
-// });
-
 const storage = multer.memoryStorage();
-
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image")) {
     cb(null, true);

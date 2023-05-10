@@ -2,6 +2,7 @@ import { promisify } from "util";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
+import fs from "fs";
 
 import { EXPIRES_TIME, ENVIROMENT } from "../constant/common.js";
 
@@ -25,7 +26,6 @@ export function setCookie(res, name = "jwt", data, options) {
     expires: new Date(Date.now() + EXPIRES_TIME["1h"]),
     secure: process.env.NODE_ENV === ENVIROMENT.prod,
     httpOnly: true,
-    sameSite: "None",
     ...options,
   });
 }
@@ -66,4 +66,16 @@ export async function sendEmail(options) {
 
   console.log("Message sent: %s", info.messageId);
   console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+}
+
+export function createFolder(path) {
+  if (fs.existsSync(path)) return;
+
+  fs.mkdirSync(path, {
+    recursive: true,
+  });
+}
+
+export function getDirName(path) {
+  return promisify(fs.readdir)(path);
 }

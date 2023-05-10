@@ -5,6 +5,7 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import xss from "xss-clean";
 import mongoSanitize from "express-mongo-sanitize";
+import expressStaticGzip from "express-static-gzip";
 
 import authRouter from "./routes/auth.js";
 import userRouter from "./routes/user.js";
@@ -23,18 +24,26 @@ app.use(
     origin: "http://localhost:3000",
   })
 );
-// app.use(cors());
 
-app.get("*.gz", function (req, res, next) {
-  res.set("Content-Encoding", "gzip");
-  res.set("Content-Type", "text/javascript");
-  next();
-});
+app.use(
+  "/unity",
+  expressStaticGzip(config.unityPath, {
+    enableBrotli: true,
+    index: false,
+    orderPreference: ["br", "gzip"],
+    serveStatic: {
+      extensions: [],
+    },
+  })
+);
 
-app.use(express.static(config.unityPath));
+// app.get("*.gz", function (req, res, next) {
+//   res.set("Content-Encoding", "gzip");
+//   res.set("Content-Type", "text/javascript");
+//   next();
+// });
+
 app.use(express.static(config.imagePath));
-
-app.use(helmet());
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -45,9 +54,10 @@ const limiter = rateLimit({
 });
 
 app.use(limiter);
+app.use(helmet());
 
 app.use(express.json({ limit: "10kb" }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(cookieParser());
 
 app.use(xss());
