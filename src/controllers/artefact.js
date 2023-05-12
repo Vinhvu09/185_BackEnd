@@ -1,4 +1,5 @@
 import multer from "multer";
+import path from "path";
 
 import config from "../configs/index.js";
 import { ERROR_CODE } from "../constant/common.js";

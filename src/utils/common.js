@@ -24,8 +24,9 @@ export function createTokenbyCrypto(data) {
 export function setCookie(res, name = "jwt", data, options) {
   res.cookie(name, data, {
     expires: new Date(Date.now() + EXPIRES_TIME["1h"]),
-    secure: process.env.NODE_ENV === ENVIROMENT.prod,
+    secure: process.env.NODE_ENV === ENVIROMENT.prod || true,
     httpOnly: true,
+    sameSite: "None",
     ...options,
   });
 }

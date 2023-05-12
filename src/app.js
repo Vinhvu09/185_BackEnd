@@ -15,6 +15,7 @@ import { globalErrorHandler } from "./middlewares/error.js";
 import { protect } from "./controllers/auth.js";
 import { ERROR_CODE } from "./constant/common.js";
 import config from "./configs/index.js";
+import { gzipRegex } from "./constant/regex.js";
 
 const app = express();
 
@@ -25,25 +26,14 @@ app.use(
   })
 );
 
-app.use(
-  "/unity",
-  expressStaticGzip(config.unityPath, {
-    enableBrotli: true,
-    index: false,
-    orderPreference: ["br", "gzip"],
-    serveStatic: {
-      extensions: [],
-    },
-  })
-);
-
-// app.get("*.gz", function (req, res, next) {
-//   res.set("Content-Encoding", "gzip");
-//   res.set("Content-Type", "text/javascript");
-//   next();
-// });
+app.get(gzipRegex, function (req, res, next) {
+  res.set("Content-Encoding", "br");
+  res.set("Content-Type", "text/javascript");
+  next();
+});
 
 app.use(express.static(config.imagePath));
+app.use(express.static(config.unityPath));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
